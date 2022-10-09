@@ -27,7 +27,9 @@ app.get("/", (req, res) => {
 // });
 
 
-app.use("/add-documents", userDocumentsRouter);
+app.use("/api/add-documents", userDocumentsRouter);
+
+
 /* Error handler middleware */
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;

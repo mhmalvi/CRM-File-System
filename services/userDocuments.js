@@ -44,35 +44,74 @@ async function getOne(field, value){
     }
   }
 
-async function create(req){
 
+   async function countStorage(clentId){
+     
+    const rows = await db.query(
+      `SELECT sum(file_sizes) as total_size FROM user_documents where client_id='${clentId}';`
+    );
+    const data = helper.emptyOrRows(rows);
+
+    //console.log(data);
+    return {
+      data  
+    }
+  }
+
+
+async function create(req, res){
+    //console.log(req);
     const requestData = req.body;
     const fileAQrray = req.file;
+  
     if (!fileAQrray) {
-       return { message: 'Please upload a file.' };
+       //return { message: 'Please upload a file.' };
+       res.status(404).send({ result: 'fail', error: { message: ' Please upload a file.' } })
     }
+    //console.log(fileAQrray);
     const fileName =fileAQrray.filename;
-    const file =  `uploads/${md5(requestData.client_id)}/${md5(requestData.user_id)}/logo/${fileName}`;
-    var size = fileAQrray.size;
-    var MyDate = new Date();
-    const created_at = MyDate.toMysqlFormat(); //return MySQL Datetime format
-
-    const result = await db.query(
-      `INSERT INTO user_documents (user_id, client_id, document_name, document_details, file_sizes, created_at) 
-      VALUES ('${requestData.user_id}', '${requestData.client_id}', '${file}', '${requestData.document_details}', '${size}', '${created_at}')`
-    );
-  
+    
+    //return {requestData};
+    
     let message = req;
-  
-    if (result.affectedRows) {
-       let details = await getOne('id', result.insertId);
-       console.log(details);
-       message = details;
-    }
+    try{
+      const file =  `uploads/${md5(requestData.client_id)}/${md5(requestData.user_id)}/logo/${fileName}`;
+      var size = fileAQrray.size;
+      var MyDate = new Date();
+      const created_at = MyDate.toMysqlFormat(); //return MySQL Datetime format
+
+      const result = await db.query(
+        `INSERT INTO user_documents (user_id, client_id, document_name, document_details, file_sizes, created_at) 
+        VALUES ('${requestData.user_id}', '${requestData.client_id}', '${file}', '${requestData.document_details}', '${size}', '${created_at}')`
+      );
+
+      
+      if (result.affectedRows) {
+        let details = await getOne('id', result.insertId);
+        console.log(details);
+        message = details;
+      }
     
     //message = userDocuments.file;
     return {message};
+    //res.status(201).send({ result: 'success', message: message  })
+
+    }catch(error){  
+      //deleteFile(file);
+      res.status(400).send({ result: 'fail', error: { message: ' Parameter mismatch' } })
+    }
+    
   }
+
+
+  const deleteFile = async (filePath, next) => {
+    try {
+      await fsPromises.unlink(filePath);
+      next();
+    } catch (err) {
+      next(err);
+    }
+  };
 
 //   async function update(id, programmingLanguage){
 //     const result = await db.query(
@@ -111,6 +150,7 @@ module.exports = {
     getMultiple,
     getOne,
     create,
+    countStorage
    // update
   }
 

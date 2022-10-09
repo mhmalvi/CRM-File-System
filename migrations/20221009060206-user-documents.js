@@ -34,7 +34,7 @@ exports.up = function(db, callback) {
       default:0
     },
     document_name:{
-      type: 'string',
+      type: 'text',
       length: 100,
       default: null
     },
