@@ -1,6 +1,10 @@
 const express = require("express");
 var bodyParser = require('body-parser');
 const app = express();
+var cors = require('cors')
+
+
+
 
 
 const dotenv = require('dotenv');
@@ -13,8 +17,12 @@ const userDocumentsRouter = require("./routes/userDocuments");
 
 app.use(express.json());
 
+app.use(cors())
+
 //app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json())
+app.use(bodyParser.json());
+
+
 
 // app.use(
 //   express.urlencoded({
@@ -31,8 +39,9 @@ app.get("/", (req, res) => {
 //     res.send(req.body);
 // });
 
+app.use('/uploads', express.static('uploads'));
 
-app.use("/api/add-documents", userDocumentsRouter);
+app.use("/api/documents", userDocumentsRouter);
 
 
 /* Error handler middleware */

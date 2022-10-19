@@ -3,11 +3,8 @@ const router = express.Router();
 const userDocuments = require('../services/userDocuments');
 const multer = require('multer');
 var path = require('path');
-var cors = require('cors');
 var md5 = require('md5');
 const fs = require('fs');
-
-
 
 
 //var maxSize =  1024 * 1024;
@@ -95,9 +92,20 @@ var storage = multer.diskStorage({
 // })
 
 /* GET User Documents */
-router.get('/', async function(req, res, next) {
+// router.get('/', async function(req, res, next) {
+//   try {
+//     res.json(await userDocuments.getMultiple(req.query.page));
+//   } catch (err) {
+//     console.error(`Error while getting User documents`, err.message);
+//     next(err);
+//   }
+// });
+
+/* GET User Documents */
+router.get('/:id', async function(req, res, next) {
+  //console.log('==',req.params.id);
   try {
-    res.json(await userDocuments.getMultiple(req.query.page));
+    res.json(await userDocuments.getOne('id', req.params.id));
   } catch (err) {
     console.error(`Error while getting User documents`, err.message);
     next(err);
@@ -105,7 +113,7 @@ router.get('/', async function(req, res, next) {
 });
 
 /* POST Documents */
-router.post('/',  upload.single('document_name'), async function(req, res, next) {
+router.post('/', upload.single('document_name'), async function(req, res, next) {
     //console.log('==',req.body);
     try {
       res.status(201).json(await userDocuments.create(req,res));
@@ -115,5 +123,24 @@ router.post('/',  upload.single('document_name'), async function(req, res, next)
     }
   });
 
+  /* Delete  User Documents */
+router.delete('/delete/:id', async function (req, res, next) {
+  //var id = req.params.id;
+  //console.log(id);
+  try {
+    res.status(200).json(await userDocuments.remove(req, res));
+  } catch (err) {
+    console.error(`Error while deleting User documents`, err.message);
+    next(err);
+  }
+});
+
+// router.delete('/delete/:id', function (req, res) {
+//      var id = req.params.id;
+//     console.log("in delete"+ id);
+//     //db.contactlist.remove({id : mongojs.ObjectId(id)}, function ( err , doc){
+//     //res.json(doc);
+//   //});
+//  });
  
 module.exports = router;
