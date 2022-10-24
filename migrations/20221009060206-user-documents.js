@@ -60,6 +60,11 @@ exports.up = function(db, callback) {
       type: 'datetime',
      default: null
     },
+    status: {
+      type: 'int',
+      length: 2,
+     default: 1
+    },
   }, function(err) {
     if (err) return callback(err);
     return callback();

@@ -4,6 +4,10 @@ const config = require('../config');
 var md5 = require('md5');
 const fs = require('fs'); 
 const fsPromises = fs.promises;
+var http = require('http');
+
+
+var message = '';
 
 async function getMultiple(page = 1){
   const offset = helper.getOffset(page, config.listPerPage);
@@ -83,8 +87,8 @@ async function create(req, res){
       const created_at = MyDate.toMysqlFormat(); //return MySQL Datetime format
 
       const result = await db.query(
-        `INSERT INTO user_documents (user_id, client_id, document_name, document_details, file_sizes, created_at) 
-        VALUES ('${requestData.user_id}', '${requestData.client_id}', '${file}', '${requestData.document_details}', '${size}', '${created_at}')`
+        `INSERT INTO user_documents (user_id, client_id, document_name, document_details, file_sizes, created_at, status) 
+        VALUES ('${requestData.user_id}', '${requestData.client_id}', '${file}', '${requestData.document_details}', '${size}', '${created_at}', '1')`
       );
 
       
@@ -105,7 +109,6 @@ async function create(req, res){
     
   }
 
-
   const deleteFile = async (req, res, filePath) => {
       
     try {
@@ -119,41 +122,88 @@ async function create(req, res){
     
   };
 
-//   async function update(id, programmingLanguage){
-//     const result = await db.query(
-//       `UPDATE user_documents 
-//       SET name="${programmingLanguage.name}", released_year=${programmingLanguage.released_year}, githut_rank=${programmingLanguage.githut_rank}, 
-//       pypl_rank=${programmingLanguage.pypl_rank}, tiobe_rank=${programmingLanguage.tiobe_rank} 
-//       WHERE id=${id}` 
-//     );
-  
-//     let message = 'Error in updating programming language';
-  
-//     if (result.affectedRows) {
-//       message = 'Programming language updated successfully';
-//     }
-  
-//     return {message};
-//   }
+  const deleteUserDocuments = async (id, studentId) => {
+
+    const data = JSON.stringify({
+      student_id: `${studentId}`  
+    });
+
+
+  var options = {
+    host: process.env.LEAD_SERVICES,
+    path: `/api/lead/checklist/${id}/delete/documents`,
+    //since we are listening on a custom port, we need to specify it by hand
+    port: 80,
+    //This is what changes the request to a POST request
+    method: 'DELETE',
+
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      'Content-Type': 'application/json',
+      'Content-Length':  Buffer.byteLength(data)
+  }
+  };
+
+  var status = true;
+  var bodyData = '';
+
+  const req = http.request(options, (res) => {
+    let data = '';
+
+  // console.log('Status Code:', res.statusCode);
+
+    res.on('data', (chunk) => {
+        data += chunk;
+    });
+
+    res.on('end', () => {
+        console.log('Body: ', JSON.parse(data));
+    });
+
+  }).on("error", (err) => {
+    //console.log("Error: ", err.message);
+  });
+
+  req.write(data);
+  req.end();
+    
+  };
 
   async function remove(req, res){
     var id = req.params.id;
-    let message = 'Error in while deleting Documents';
+    message = 'Data delete successfully';
     let document_name = '';
     let result = await getOne('id', id);
+    let student_id = 0;
     if(result.data!=""){
      
       for (var key in result.data) {
         document_name = result.data[key].document_name;
+        student_id = result.data[key].user_id;
       };
   
     }
+
+    (async function () {
+      // wait to http request to finish
+      await deleteUserDocuments(id, student_id).then(function(result){
+         // console.log(result);
+         db.query(
+          `UPDATE user_documents SET status = 0 WHERE id=${id}`
+        );
+         message = 'Data delete successfully';
+      })
+      
+      // below code will be executed after http request is finished
+     // console.log(2);
+    })();
+
+    //return  {message};
+  
     if(document_name!=""){
       if(deleteFile(req, res, document_name)){
-        message = 'Documents deleted successfully';
-        const result = await db.query(
-             `DELETE FROM user_documents WHERE id=${id}`
-           );
+    
+      
       }else{
         res.status(401).send({ result: 'fail', error: { message: ' Error ! Please try again' } })
       }    
