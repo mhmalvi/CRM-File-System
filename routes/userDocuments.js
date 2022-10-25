@@ -127,13 +127,13 @@ router.post('/', upload.single('document_name'), async function(req, res, next) 
 router.delete('/delete/:id', async function (req, res, next) {
   //var id = req.params.id;
   //console.log(id);
-  res.status(200).json(await userDocuments.remove(req, res));
-  // try {
-  //   res.status(200).json(await userDocuments.remove(req, res));
-  // } catch (err) {
-  //   console.error(`Error while deleting User documents`, err.message);
-  //   next(err);
-  // }
+  //res.status(200).json(await userDocuments.remove(req, res));
+   try {
+     res.status(200).json(await userDocuments.remove(req, res));
+   } catch (err) {
+     console.error(`Error while deleting User documents`, err.message);
+     next(err);
+   }
 });
 
 // router.delete('/delete/:id', function (req, res) {

@@ -117,7 +117,8 @@ async function create(req, res){
       return true;
      
     } catch (err) {
-      res.status(401).send({ result: 'fail', error: { message: ' Document not found' } })
+      return false;
+      //res.status(401).send({ result: 'fail', error: { message: ' Document not found' } })
     }
     
   };
@@ -184,32 +185,40 @@ async function create(req, res){
   
     }
 
+    if(document_name!=""){
     (async function () {
       // wait to http request to finish
-      await deleteUserDocuments(id, student_id).then(function(result){
-         // console.log(result);
-         db.query(
-          `UPDATE user_documents SET status = 0 WHERE id=${id}`
-        );
-         message = 'Data delete successfully';
-      })
+      if(deleteFile(req, res, document_name)){
+        await deleteUserDocuments(id, student_id).then(function(result){
+          // console.log(result);
+          db.query(
+           `UPDATE user_documents SET status = 0 WHERE id=${id}`
+         );
+          
+          message = 'Data delete successfully';
+       })
+      }else{
+        res.status(401).send({ result: 'fail', error: { message: ' Error ! Please try again' } })
+      }
       
       // below code will be executed after http request is finished
      // console.log(2);
     })();
 
-    //return  {message};
+  }
+
+    return  {message};
   
     if(document_name!=""){
       if(deleteFile(req, res, document_name)){
     
       
       }else{
-        res.status(401).send({ result: 'fail', error: { message: ' Error ! Please try again' } })
+       // res.status(401).send({ result: 'fail', error: { message: ' Error ! Please try again' } })
       }    
        
     }else{
-      res.status(401).send({ result: 'fail', error: { message: ' Document not found' } })
+      //res.status(401).send({ result: 'fail', error: { message: ' Document not found' } })
     }
     //console.log(document_name);
     return {message};
