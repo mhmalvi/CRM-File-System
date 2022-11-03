@@ -50,7 +50,7 @@ var storage = multer.diskStorage({
                 //const error = new Error('File is too big');
                 cb(new multer.MulterError('LIMIT_UNEXPECTED_FILE'), false);
               
-               return;
+                return;
   
               }else{
   
@@ -65,8 +65,8 @@ var storage = multer.diskStorage({
               }
               
             }else{
-              const error = new Error('You have no sufficient storage for uploading this file');
-              cb(error,'')
+              cb(new multer.MulterError('LIMIT_UNEXPECTED_FILE'), false);           
+                return;
             }
                 
           })
