@@ -105,7 +105,7 @@ async function create(req, res){
 
    // }catch(error){  
       //deleteFile(file);
-      res.status(400).send({ result: 'fail', error: { message: ' Parameter mismatch' } })
+      //res.status(400).send({ result: 'fail', error: { message: ' Parameter mismatch' } })
     //}
     
   }
