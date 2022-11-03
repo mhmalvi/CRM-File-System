@@ -96,6 +96,7 @@ async function create(req, res){
         let details = await getOne('id', result.insertId);
         console.log(details);
         message = details;
+        return {message};
       }
     
     //message = userDocuments.file;
