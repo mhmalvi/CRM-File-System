@@ -80,7 +80,7 @@ async function create(req, res){
     //return {requestData};
     
     let message = req;
-    try{
+    //try{
       const file =  `uploads/${md5(requestData.client_id)}/${md5(requestData.user_id)}/${fileName}`;
       var size = fileAQrray.size;
       var MyDate = new Date();
@@ -91,7 +91,7 @@ async function create(req, res){
         VALUES ('${requestData.user_id}', '${requestData.client_id}', '${file}', '${requestData.document_details}', '${size}', '${created_at}', '1')`
       );
 
-      
+      console.log(result);
       if (result.affectedRows) {
         let details = await getOne('id', result.insertId);
         console.log(details);
@@ -103,10 +103,10 @@ async function create(req, res){
     return {message};
     //res.status(201).send({ result: 'success', message: message  })
 
-    }catch(error){  
+    //}catch(error){  
       //deleteFile(file);
-      res.status(400).send({ result: 'fail', error: { message: ' Parameter mismatch' } })
-    }
+     // res.status(400).send({ result: 'fail', error: { message: ' Parameter mismatch' } })
+    //}
     
   }
 
