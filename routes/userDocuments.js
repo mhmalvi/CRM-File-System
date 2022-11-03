@@ -39,15 +39,18 @@ var storage = multer.diskStorage({
 
             //console.log('sizes', sizes)
 
-            let defaultStorages = 1024 * 1024;   // Default Per User
-
-            //let defaultStorages = 166200;   // Default Per User
+            let defaultStorages = 1048576 * 100;   // 1 GB  Default Per User
 
             let calculateSize = defaultStorages - sizes ;
+            
+            //console.log(fileSize, calculateSize)
             if(calculateSize>0){
               if(fileSize>calculateSize){
-                const error = new Error('File is too big');
-                cb(error,'File is too big')
+                
+                //const error = new Error('File is too big');
+                cb(new multer.MulterError('LIMIT_UNEXPECTED_FILE'), false);
+              
+               return;
   
               }else{
   
@@ -84,7 +87,7 @@ var storage = multer.diskStorage({
 
  const upload = multer({
   storage: storage
-})
+}).single('document_name');
   
 //  const upload = multer({
 //   storage: storage,
@@ -113,14 +116,28 @@ router.get('/:id', async function(req, res, next) {
 });
 
 /* POST Documents */
-router.post('/', upload.single('document_name'), async function(req, res, next) {
+router.post('/',  async function(req, res, next) {
     //console.log('==',req.body);
-    try {
-      res.status(201).json(await userDocuments.create(req,res));
-    } catch (err) {
-      console.error(`Error while creating User Documents`, err.message);
-      next(err);
-    }
+    upload(req, res, (err) => {
+      if (err) {
+        console.log(err.code);
+        if (err.code === 'LIMIT_FILE_SIZE') {    
+          next(err);
+        } 
+      } else{
+        try {
+          userDocuments.create(req,res).then(function(result){
+            res.status(201).json(result);
+          });
+          
+        } catch (err) {
+          console.error(`Error while creating User Documents`, err.message);
+          next(err);
+        }
+
+      }     
+    });
+   
   });
 
   /* Delete  User Documents */
