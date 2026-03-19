@@ -1,3 +1,8 @@
 node_modules
 uploads
 .env
+# Security
+.env.*
+credentials.json
+serviceAccountKey.json
+.claude/
